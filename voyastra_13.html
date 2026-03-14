@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Voyastra – Find the Best Travel Deals</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --cream:#F5F0E8;--cream-dark:#EDE6D6;--cream-deep:#E3D9C4;
+  --gold:#B8975A;--gold-light:#D4B87A;
+  --dark:#1C1812;--text:#3A3530;--muted:#7A7168;
+  --border:rgba(90,75,50,0.13);--card:#FFFDF8;
+  --red:#C0392B;--green:#27AE60;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--cream);font-family:'Jost',sans-serif;color:var(--text);line-height:1.6;}
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--cream-dark);}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px;}
+
+/* VIEWS */
+.view{display:none;}
+.view.active{display:block;}
+
+/* ═══ AUTH VIEW ═══ */
+#authView{min-height:100vh;background:var(--cream);display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+#authView.active{display:flex;}
+.auth-topbar{position:fixed;top:0;left:0;right:0;z-index:300;background:var(--dark);padding:8px 28px;display:flex;justify-content:space-between;align-items:center;}
+.auth-topbar-logo{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:700;letter-spacing:4px;color:#fff;}
+.auth-topbar-logo span{color:var(--gold-light);}
+.auth-topbar-clock{font-size:13px;color:var(--gold-light);letter-spacing:2px;font-variant-numeric:tabular-nums;}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:8px;width:min(440px,100%);padding:44px 40px;box-shadow:0 12px 48px rgba(90,70,30,0.13);margin-top:52px;animation:fadeUp .5s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:none;}}
+.auth-logo{text-align:center;margin-bottom:30px;}
+.auth-logo h1{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;letter-spacing:7px;color:var(--dark);}
+.auth-logo h1 span{color:var(--gold);}
+.auth-logo p{font-size:11px;letter-spacing:3px;color:var(--muted);margin-top:5px;text-transform:uppercase;}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:28px;}
+.atab{flex:1;background:none;border:none;padding:10px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;}
+.atab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.auth-form{display:none;}
+.auth-form.active{display:block;}
+.fg{margin-bottom:16px;}
+.fg label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.fg input{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:3px;padding:11px 14px;font-family:'Jost',sans-serif;font-size:13px;color:var(--dark);outline:none;transition:border-color .2s;}
+.fg input:focus{border-color:var(--gold);}
+.emsg{font-size:11px;color:var(--red);margin-top:4px;display:none;}
+.smsg{font-size:12px;color:var(--green);text-align:center;margin-bottom:14px;padding:8px;background:rgba(39,174,96,0.08);border-radius:3px;display:none;}
+.smsg.show{display:block;}
+.gen-err{font-size:12px;color:var(--red);text-align:center;margin-bottom:10px;display:none;}
+.gen-err.show{display:block;}
+.auth-submit{width:100%;background:var(--dark);color:#fff;border:none;padding:13px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:3px;margin-top:6px;transition:background .2s;}
+.auth-submit:hover{background:var(--gold);}
+.or-div{display:flex;align-items:center;gap:10px;margin:18px 0;font-size:11px;color:var(--muted);}
+.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--border);}
+.soc-btn{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:3px;padding:10px;font-family:'Jost',sans-serif;font-size:12px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;margin-bottom:10px;}
+.soc-btn:hover{background:var(--cream-dark);border-color:var(--gold);}
+.guest-link{text-align:center;margin-top:18px;font-size:12px;color:var(--muted);}
+.guest-link button{background:none;border:none;color:var(--gold);font-size:12px;cursor:pointer;font-family:'Jost',sans-serif;text-decoration:underline;}
+
+/* ═══ APP VIEW ═══ */
+.top-bar{background:var(--dark);padding:7px 40px;display:flex;justify-content:space-between;align-items:center;}
+.top-bar-left{font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:1px;}
+.top-bar-right{display:flex;align-items:center;gap:16px;}
+.live-clock{font-size:13px;color:var(--gold-light);letter-spacing:2px;font-variant-numeric:tabular-nums;min-width:92px;}
+.user-pill{font-size:11px;color:rgba(255,255,255,0.65);display:flex;align-items:center;gap:10px;}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.5);font-size:10px;letter-spacing:1px;padding:3px 10px;border-radius:2px;cursor:pointer;font-family:'Jost',sans-serif;transition:all .2s;}
+.logout-btn:hover{border-color:var(--gold);color:var(--gold);}
+.signin-link-btn{background:none;border:1px solid rgba(255,255,255,0.18);color:rgba(255,255,255,0.6);font-size:10px;letter-spacing:1px;padding:4px 12px;border-radius:2px;cursor:pointer;font-family:'Jost',sans-serif;transition:all .2s;}
+.signin-link-btn:hover{border-color:var(--gold-light);color:var(--gold-light);}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(245,240,232,0.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;letter-spacing:4px;color:var(--dark);cursor:pointer;}
+.nav-logo span{color:var(--gold);}
+.nav-links{display:flex;gap:32px;list-style:none;}
+.nav-links a{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-cta{background:var(--dark);color:#fff;border:none;padding:9px 22px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s;}
+.nav-cta:hover{background:var(--gold);}
+
+/* ═══ HERO ═══ */
+.hero{background:var(--cream-dark);padding:56px 40px 64px;text-align:center;position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(184,151,90,0.08) 0%,transparent 70%);pointer-events:none;}
+.hero-eyebrow{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;opacity:0;animation:fadeUp .7s .1s forwards;}
+.hero h1{font-family:'Cormorant Garamond',serif;font-size:clamp(44px,9vw,96px);font-weight:700;letter-spacing:10px;color:var(--dark);line-height:1;margin-bottom:14px;opacity:0;animation:fadeUp .7s .25s forwards;}
+.hero-sub{font-size:13px;letter-spacing:3px;color:var(--muted);margin-bottom:36px;opacity:0;animation:fadeUp .7s .4s forwards;}
+
+/* ═══ SEARCH CARD ═══ */
+.search-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:28px 36px 32px;max-width:900px;margin:0 auto;box-shadow:0 4px 32px rgba(90,70,30,0.08);opacity:0;animation:fadeUp .7s .48s forwards;}
+.sc-label{font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.sc-label::before,.sc-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.search-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.sfield{position:relative;}
+.sfield label{display:block;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.sfield input{width:100%;background:var(--cream);border:1px solid var(--border);border-radius:2px;padding:10px 14px;font-family:'Jost',sans-serif;font-size:13px;color:var(--dark);outline:none;transition:border-color .2s;}
+.sfield input:focus{border-color:var(--gold);}
+
+/* AUTOCOMPLETE */
+.ac-drop{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-top:none;border-radius:0 0 4px 4px;max-height:200px;overflow-y:auto;z-index:500;display:none;box-shadow:0 8px 24px rgba(90,70,30,0.1);}
+.ac-drop.open{display:block;}
+.ac-item{padding:9px 14px;font-size:13px;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s;}
+.ac-item:last-child{border-bottom:none;}
+.ac-item:hover,.ac-item.hi{background:var(--cream-dark);}
+
+/* TRAVEL MODE BUTTONS */
+.mode-section{margin-bottom:16px;}
+.mode-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block;}
+.mode-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.mode-btn{background:var(--cream);border:1px solid var(--border);border-radius:3px;padding:12px 8px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:1px;color:var(--text);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:6px;text-transform:uppercase;}
+.mode-btn .mode-icon{font-size:22px;line-height:1;}
+.mode-btn .mode-name{font-size:10px;letter-spacing:2px;color:var(--muted);}
+.mode-btn:hover,.mode-btn.active{background:var(--dark);border-color:var(--dark);color:#fff;}
+.mode-btn:hover .mode-name,.mode-btn.active .mode-name{color:rgba(255,255,255,0.7);}
+.mode-btn.flight:hover,.mode-btn.flight.active{background:#1a56a0;border-color:#1a56a0;}
+.mode-btn.train:hover,.mode-btn.train.active{background:#1a7a3c;border-color:#1a7a3c;}
+.mode-btn.ship:hover,.mode-btn.ship.active{background:#0e6b8a;border-color:#0e6b8a;}
+.mode-btn.bus:hover,.mode-btn.bus.active{background:#8a3e1a;border-color:#8a3e1a;}
+
+.search-action-row{display:flex;gap:12px;margin-top:4px;}
+.map-route-btn{background:var(--cream-dark);color:var(--dark);border:1px solid var(--border);padding:13px 18px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.map-route-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold);}
+.search-btn{flex:1;background:var(--dark);color:#fff;border:none;padding:13px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .25s,transform .1s;}
+.search-btn:hover{background:var(--gold);}
+.search-btn:active{transform:scale(0.99);}
+
+/* BOOKING MODAL */
+.bk-overlay{display:none;position:fixed;inset:0;z-index:998;background:rgba(28,24,18,0.6);backdrop-filter:blur(5px);align-items:center;justify-content:center;}
+.bk-overlay.open{display:flex;}
+.bk-modal{background:var(--card);border:1px solid var(--border);border-radius:8px;width:min(560px,94vw);padding:28px;position:relative;animation:mIn .25s ease;max-height:92vh;overflow-y:auto;}
+@keyframes mIn{from{opacity:0;transform:translateY(14px) scale(0.97);}to{opacity:1;transform:none;}}
+.bk-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;}
+.bk-close:hover{color:var(--dark);}
+.bk-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--dark);margin-bottom:4px;}
+.bk-sub{font-size:11px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;}
+.bk-div{height:1px;background:var(--border);margin-bottom:18px;}
+.bk-sec{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;}
+.bk-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.bk-app{display:flex;align-items:center;gap:10px;background:var(--cream);border:1px solid var(--border);border-radius:4px;padding:11px 13px;text-decoration:none;transition:all .18s;cursor:pointer;}
+.bk-app:hover{background:var(--cream-dark);border-color:var(--gold);transform:translateY(-1px);}
+.bk-ico{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:#fff;border:1px solid var(--border);}
+.bk-app-name{font-size:12px;font-weight:600;color:var(--dark);}
+.bk-app-type{font-size:10px;color:var(--muted);}
+
+/* STATS */
+.stats{background:var(--dark);padding:28px 40px;}
+.stats-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-around;flex-wrap:wrap;gap:20px;}
+.stat{text-align:center;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:var(--gold-light);line-height:1;}
+.stat-lbl{font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.45);text-transform:uppercase;margin-top:4px;}
+
+/* SECTION */
+.section{padding:80px 40px;max-width:1200px;margin:0 auto;}
+.sec-head{text-align:center;margin-bottom:48px;}
+.sec-eye{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,44px);font-weight:700;color:var(--dark);letter-spacing:1px;}
+
+/* FILTERS */
+.filters{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:40px;}
+.filters input{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:8px 18px;font-family:'Jost',sans-serif;font-size:12px;color:var(--text);outline:none;width:160px;}
+.filters input:focus{border-color:var(--gold);}
+.fbtn{background:transparent;border:1px solid var(--border);border-radius:20px;padding:7px 18px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);cursor:pointer;transition:all .18s;}
+.fbtn:hover,.fbtn.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+
+/* DESTINATION CARDS */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:24px;}
+.dest-card{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:transform .25s,box-shadow .25s;}
+.dest-card:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(90,70,30,0.12);}
+.card-img{position:relative;height:180px;overflow:hidden;}
+.card-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
+.dest-card:hover .card-img img{transform:scale(1.06);}
+.card-badge{position:absolute;top:12px;left:12px;background:rgba(28,24,18,0.72);color:#fff;font-size:11px;padding:3px 10px;border-radius:2px;letter-spacing:1px;}
+.card-rating{position:absolute;top:12px;right:12px;background:var(--gold);color:#fff;font-size:11px;padding:3px 10px;border-radius:2px;font-weight:600;}
+.card-body{padding:16px 18px;}
+.card-city{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--dark);margin-bottom:2px;}
+.card-region{font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;text-transform:uppercase;}
+.card-meta{font-size:12px;color:var(--muted);margin-bottom:10px;}
+.card-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.ctag{background:var(--cream-dark);border-radius:2px;font-size:10px;color:var(--muted);padding:3px 9px;letter-spacing:1px;text-transform:uppercase;}
+.card-foot{border-top:1px solid var(--border);padding-top:12px;}
+.exp-btn{width:100%;background:var(--dark);color:#fff;border:none;padding:9px 16px;font-family:'Jost',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s;}
+.exp-btn:hover{background:var(--gold);}
+
+/* EXPLORE MODAL */
+.modal-ov{display:none;position:fixed;inset:0;z-index:999;background:rgba(28,24,18,0.62);backdrop-filter:blur(5px);align-items:center;justify-content:center;}
+.modal-ov.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:8px;width:min(500px,93vw);padding:32px 28px;position:relative;animation:mIn .25s ease;max-height:90vh;overflow-y:auto;}
+.modal-x{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;}
+.modal-x:hover{color:var(--dark);}
+.modal-city{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--dark);margin-bottom:4px;}
+.modal-reg{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:22px;}
+.modal-div{height:1px;background:var(--border);margin-bottom:20px;}
+.modal-sec{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.modal-acts{display:flex;flex-direction:column;gap:10px;}
+.mact-btn{display:flex;align-items:center;gap:14px;background:var(--cream);border:1px solid var(--border);border-radius:4px;padding:14px 16px;cursor:pointer;width:100%;transition:all .18s;}
+.mact-btn:hover{background:var(--cream-dark);border-color:var(--gold);}
+.mact-ico{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.mact-ico.price{background:#FFF3E0;}
+.mact-txt strong{display:block;font-size:13px;font-weight:600;color:var(--dark);font-family:'Jost',sans-serif;}
+.mact-txt span{font-size:11px;color:var(--muted);}
+.mact-arr{margin-left:auto;color:var(--muted);font-size:16px;}
+.apps-pnl{display:none;}
+.apps-pnl.open{display:block;}
+.apps-back{background:none;border:none;color:var(--gold);font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;font-family:'Jost',sans-serif;margin-bottom:14px;padding:0;display:flex;align-items:center;gap:6px;}
+.apps-back:hover{color:var(--dark);}
+.apps-note{font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.6;background:var(--cream);padding:10px 12px;border-radius:3px;border:1px solid var(--border);}
+.apps-note strong{color:var(--dark);}
+.apps-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.app-link{display:flex;align-items:center;gap:10px;background:var(--cream);border:1px solid var(--border);border-radius:4px;padding:11px 13px;text-decoration:none;transition:all .18s;}
+.app-link:hover{background:var(--cream-dark);border-color:var(--gold);transform:translateY(-1px);}
+.app-ico{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:#fff;border:1px solid var(--border);}
+.app-nm{font-size:12px;font-weight:600;color:var(--dark);}
+.app-tp{font-size:10px;color:var(--muted);}
+
+/* WHY US */
+.why-sec{background:var(--cream-dark);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:32px;max-width:1100px;margin:0 auto;padding:72px 40px;}
+.why-item{text-align:center;}
+.why-ico{font-size:28px;margin-bottom:14px;}
+.why-ttl{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--dark);margin-bottom:8px;}
+.why-desc{font-size:13px;color:var(--muted);line-height:1.7;}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;max-width:1100px;margin:0 auto;padding:80px 40px;}
+.about-img{border-radius:4px;overflow:hidden;aspect-ratio:4/3;border:1px solid var(--border);}
+.about-img img{width:100%;height:100%;object-fit:cover;}
+.about-eye{font-size:10px;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;}
+.about-ttl{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,3.5vw,42px);font-weight:700;color:var(--dark);margin-bottom:20px;line-height:1.2;}
+.about-txt{font-size:14px;color:var(--muted);line-height:1.9;margin-bottom:24px;}
+.about-btn{display:inline-block;background:var(--dark);color:#fff;padding:12px 28px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;border-radius:2px;cursor:pointer;transition:background .2s;border:none;}
+.about-btn:hover{background:var(--gold);}
+
+/* TESTIMONIALS */
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:28px 28px 24px;}
+.tcard-stars{color:var(--gold);font-size:14px;margin-bottom:14px;letter-spacing:2px;}
+.tcard-txt{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;color:var(--dark);line-height:1.7;margin-bottom:20px;}
+.tcard-auth{display:flex;align-items:center;gap:12px;}
+.tcard-av{width:38px;height:38px;border-radius:50%;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--gold);border:1px solid var(--border);}
+.tcard-nm{font-size:13px;font-weight:600;color:var(--dark);}
+.tcard-loc{font-size:11px;color:var(--muted);letter-spacing:1px;}
+
+/* CONTACT */
+.contact-sec{background:var(--cream-dark);border-top:1px solid var(--border);}
+.contact-inner{max-width:640px;margin:0 auto;padding:80px 40px;text-align:center;}
+.contact-ttl{font-family:'Cormorant Garamond',serif;font-size:clamp(28px,4vw,42px);font-weight:700;color:var(--dark);margin-bottom:10px;}
+.contact-sub{font-size:13px;color:var(--muted);margin-bottom:40px;}
+.contact-form{display:flex;flex-direction:column;gap:14px;text-align:left;}
+.contact-form input,.contact-form textarea{background:var(--cream);border:1px solid var(--border);border-radius:2px;padding:12px 16px;font-family:'Jost',sans-serif;font-size:13px;color:var(--dark);outline:none;transition:border-color .2s;width:100%;}
+.contact-form input:focus,.contact-form textarea:focus{border-color:var(--gold);}
+.contact-form textarea{height:120px;resize:vertical;}
+.c-submit{background:var(--dark);color:#fff;border:none;padding:14px;font-family:'Jost',sans-serif;font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s;}
+.c-submit:hover{background:var(--gold);}
+
+/* FOOTER */
+footer{background:var(--dark);color:rgba(255,255,255,0.55);padding:48px 40px 32px;}
+.footer-inner{max-width:1100px;margin:0 auto;}
+.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+.fbrand .flogo{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;letter-spacing:4px;color:#fff;margin-bottom:12px;}
+.fbrand .flogo span{color:var(--gold);}
+.fbrand p{font-size:12px;line-height:1.8;}
+.fcol h4{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold-light);margin-bottom:16px;}
+.fcol ul{list-style:none;}
+.fcol ul li{margin-bottom:8px;}
+.fcol ul li a{font-size:12px;color:rgba(255,255,255,0.5);text-decoration:none;cursor:pointer;transition:color .2s;}
+.fcol ul li a:hover{color:var(--gold-light);}
+.footer-bot{border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.footer-bot p{font-size:11px;letter-spacing:1px;}
+.footer-bot span{color:var(--gold-light);}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s;}
+.reveal.visible{opacity:1;transform:none;}
+
+@media(max-width:900px){
+  .footer-top{grid-template-columns:1fr 1fr;}
+  .about-grid{grid-template-columns:1fr;}
+  .about-img{aspect-ratio:16/9;}
+  .mode-buttons{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:640px){
+  nav,.top-bar{padding:0 16px;}
+  .top-bar{padding:7px 16px;}
+  .nav-links{display:none;}
+  .hero{padding:52px 20px 48px;}
+  .search-card{max-width:100%;padding:20px 18px 24px;}
+  .search-row{grid-template-columns:1fr;}
+  .mode-buttons{grid-template-columns:repeat(2,1fr);}
+  .search-action-row{flex-direction:column;}
+  .map-route-btn{justify-content:center;}
+  .map-modal-body{height:300px;}
+  .stats{padding:24px 20px;}
+  .section{padding:60px 20px;}
+  .footer-top{grid-template-columns:1fr;}
+  footer{padding:40px 20px 24px;}
+  .footer-bot{flex-direction:column;text-align:center;}
+  .about-grid,.why-grid,.contact-inner{padding:60px 20px;}
+  .apps-grid,.bk-grid{grid-template-columns:1fr;}
+  .top-bar-left{display:none;}
+  .auth-card{padding:32px 22px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ AUTH VIEW ═══════════════ -->
+<div id="authView" class="active">
+  <div class="auth-topbar">
+    <div class="auth-topbar-logo">VOY<span>✦</span>ASTRA</div>
+    <div class="auth-topbar-clock" id="authClock">--:--:-- --</div>
+  </div>
+  <div class="auth-card">
+    <div class="auth-logo">
+      <h1>VOY<span>✦</span>ASTRA</h1>
+      <p>✦ the star that guides your journey ✦</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="atab active" data-tab="login">Sign In</button>
+      <button class="atab" data-tab="register">Register</button>
+    </div>
+    <!-- LOGIN -->
+    <form class="auth-form active" id="loginForm" novalidate>
+      <div class="smsg" id="loginOk">Welcome back! Loading Voyastra…</div>
+      <div class="fg"><label>Email Address</label><input type="email" id="lEmail" placeholder="you@example.com"/><div class="emsg" id="lEmailErr">Please enter a valid email.</div></div>
+      <div class="fg"><label>Password</label><input type="password" id="lPass" placeholder="Your password"/><div class="emsg" id="lPassErr">Password is required.</div></div>
+      <div class="gen-err" id="lGenErr"></div>
+      <button class="auth-submit" type="submit">Sign In</button>
+      <div class="or-div">or continue with</div>
+      <button type="button" class="soc-btn" onclick="alert('Social login is a demo. Please use email/password.')"><span style="font-weight:700;font-size:15px;color:#4285F4;">G</span> Continue with Google</button>
+      <button type="button" class="soc-btn" onclick="alert('Social login is a demo. Please use email/password.')"><span style="font-weight:700;font-size:15px;color:#1877F2;">f</span> Continue with Facebook</button>
+    </form>
+    <!-- REGISTER -->
+    <form class="auth-form" id="regForm" novalidate>
+      <div class="smsg" id="regOk">Account created! Signing you in…</div>
+      <div class="fg"><label>Full Name</label><input type="text" id="rName" placeholder="Your full name"/><div class="emsg" id="rNameErr">Name is required.</div></div>
+      <div class="fg"><label>Email Address</label><input type="email" id="rEmail" placeholder="you@example.com"/><div class="emsg" id="rEmailErr">Enter a valid email address.</div></div>
+      <div class="fg"><label>Password</label><input type="password" id="rPass" placeholder="Min. 6 characters"/><div class="emsg" id="rPassErr">Password must be at least 6 characters.</div></div>
+      <div class="fg"><label>Confirm Password</label><input type="password" id="rPass2" placeholder="Repeat your password"/><div class="emsg" id="rPass2Err">Passwords do not match.</div></div>
+      <div class="gen-err" id="rGenErr"></div>
+      <button class="auth-submit" type="submit">Create Account</button>
+    </form>
+    <div class="guest-link">Just browsing? <button onclick="showApp()">Continue as guest →</button></div>
+  </div>
+</div>
+
+<!-- ═══════════════ APP VIEW ═══════════════ -->
+<div id="appView" class="view">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-bar-left">✦ Best prices guaranteed across 190+ countries</div>
+    <div class="top-bar-right">
+      <div class="live-clock" id="appClock">--:--:-- --</div>
+      <div class="user-pill" id="userPill" style="display:none;">
+        <span id="uName"></span>
+        <button class="logout-btn" id="logoutBtn">Sign out</button>
+      </div>
+      <button class="signin-link-btn" id="signinTopBtn" onclick="showAuth()" style="display:none;">Sign In</button>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo" onclick="scrollToTop()">VOY<span>✦</span>ASTRA</div>
+    <ul class="nav-links">
+      <li><a href="#destinations">Destinations</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="nav-cta" id="navCta">Book Now</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">✦ the star that guides your journey ✦</div>
+    <h1>VOYASTRA</h1>
+    <div class="hero-sub">✦ Discover, Navigate &amp; Book Your Next Adventure ✦</div>
+
+    <!-- SEARCH CARD -->
+    <div class="search-card">
+      <div class="sc-label">Search Your Travel by Different Mode</div>
+
+      <div class="search-row">
+        <div class="sfield">
+          <label>From — Any City in the World</label>
+          <input type="text" id="fromInput" placeholder="e.g. Hyderabad, London, Dubai…" autocomplete="off"/>
+          <div class="ac-drop" id="fromDrop"></div>
+        </div>
+        <div class="sfield">
+          <label>To — Destination / Tourist Spot</label>
+          <input type="text" id="toInput" placeholder="e.g. Taj Mahal, Bali, Paris…" autocomplete="off"/>
+          <div class="ac-drop" id="toDrop"></div>
+        </div>
+      </div>
+
+      <div class="search-row">
+        <div class="sfield"><label>Departure Date</label><input type="date" id="depDate"/></div>
+        <div class="sfield"><label>Departure Time</label><input type="time" id="depTime"/></div>
+      </div>
+
+      <!-- TRAVEL MODE SELECTOR -->
+      <div class="mode-section">
+        <span class="mode-label">Select Travel Mode</span>
+        <div class="mode-buttons">
+          <button class="mode-btn flight active" data-mode="flight">
+            <span class="mode-icon">✈</span>
+            <span class="mode-name">Flight</span>
+          </button>
+          <button class="mode-btn train" data-mode="train">
+            <span class="mode-icon">🚂</span>
+            <span class="mode-name">Train</span>
+          </button>
+          <button class="mode-btn ship" data-mode="ship">
+            <span class="mode-icon">🚢</span>
+            <span class="mode-name">Ship / Ferry</span>
+          </button>
+          <button class="mode-btn bus" data-mode="bus">
+            <span class="mode-icon">🚌</span>
+            <span class="mode-name">Bus</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="search-action-row">
+        <button class="map-route-btn" id="mapRouteBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          View Route on Map
+        </button>
+        <button class="search-btn" id="searchBtn">Book This Journey</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stats-inner">
+      <div class="stat"><div class="stat-num">500+</div><div class="stat-lbl">Airlines</div></div>
+      <div class="stat"><div class="stat-num">4.8M</div><div class="stat-lbl">Travellers</div></div>
+      <div class="stat"><div class="stat-num">190+</div><div class="stat-lbl">Countries</div></div>
+      <div class="stat"><div class="stat-num">98%</div><div class="stat-lbl">Satisfaction</div></div>
+      <div class="stat"><div class="stat-num">24/7</div><div class="stat-lbl">Support</div></div>
+    </div>
+  </div>
+
+  <!-- DESTINATIONS -->
+  <section id="destinations" style="background:var(--cream);padding:80px 0 0;">
+    <div class="section">
+      <div class="sec-head reveal">
+        <div class="sec-eye">✦ explore the world</div>
+        <h2 class="sec-title">Discover Destinations</h2>
+      </div>
+      <div class="filters reveal">
+        <input type="text" id="searchInput" placeholder="Search destinations…"/>
+        <button class="fbtn active" data-filter="all">All</button>
+        <button class="fbtn" data-filter="flight">Flight</button>
+        <button class="fbtn" data-filter="train">Train</button>
+        <button class="fbtn" data-filter="bus">Bus</button>
+        <button class="fbtn" data-filter="cruise">Cruise</button>
+        <button class="fbtn" data-filter="hidden">Hidden Gems</button>
+      </div>
+      <div class="card-grid" id="cardGrid"></div>
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section class="why-sec reveal">
+    <div class="why-grid">
+      <div class="why-item"><div class="why-ico">✈</div><h3 class="why-ttl">Best Price Guarantee</h3><p class="why-desc">We compare 500+ airlines to find you the lowest fares with no hidden fees.</p></div>
+      <div class="why-item"><div class="why-ico">🗺</div><h3 class="why-ttl">Expert Curation</h3><p class="why-desc">Every destination handpicked by our travel experts for authenticity and wonder.</p></div>
+      <div class="why-item"><div class="why-ico">🛡</div><h3 class="why-ttl">Safe &amp; Secure</h3><p class="why-desc">Fully protected bookings with 24/7 global emergency support wherever you go.</p></div>
+      <div class="why-item"><div class="why-ico">⭐</div><h3 class="why-ttl">4.8M Happy Travellers</h3><p class="why-desc">Trusted by millions worldwide with a 98% satisfaction rate.</p></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" style="background:var(--cream);">
+    <div class="about-grid reveal">
+      <div class="about-img"><img src="https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=75" alt="Travel" loading="lazy"/></div>
+      <div>
+        <div class="about-eye">✦ Our Story</div>
+        <h2 class="about-ttl">The Star That Guides Your Journey</h2>
+        <p class="about-txt">Voyastra was born from a simple belief: travel should be effortless, inspiring, and accessible to everyone. We combine cutting-edge search technology with deep human expertise to connect you with the world's most extraordinary destinations.</p>
+        <p class="about-txt">From the backstreets of Tokyo to the beaches of Maldives, we've curated every route, every hotel, and every experience with care.</p>
+        <button class="about-btn" onclick="document.getElementById('destinations').scrollIntoView({behavior:'smooth'})">Explore Destinations</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
+  <section id="reviews" style="background:var(--cream);">
+    <div class="section">
+      <div class="sec-head reveal">
+        <div class="sec-eye">✦ traveller stories</div>
+        <h2 class="sec-title">What Our Travellers Say</h2>
+      </div>
+      <div class="testi-grid reveal">
+        <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-txt">"Voyastra found us a Bali package we couldn't believe was real. Seamless booking, gorgeous resort."</p><div class="tcard-auth"><div class="tcard-av">PR</div><div><div class="tcard-nm">Priya Reddy</div><div class="tcard-loc">Hyderabad, India</div></div></div></div>
+        <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-txt">"Tokyo in cherry blossom season — a dream. Voyastra made every detail effortless."</p><div class="tcard-auth"><div class="tcard-av">MK</div><div><div class="tcard-nm">Marco Klein</div><div class="tcard-loc">Berlin, Germany</div></div></div></div>
+        <div class="tcard"><div class="tcard-stars">★★★★★</div><p class="tcard-txt">"From Paris to Santorini in one booking. The 24/7 support saved us when our flight changed."</p><div class="tcard-auth"><div class="tcard-av">AS</div><div><div class="tcard-nm">Amara Sow</div><div class="tcard-loc">Lagos, Nigeria</div></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="contact-sec">
+    <div class="contact-inner">
+      <div class="reveal">
+        <div class="sec-eye" style="margin-bottom:10px;">✦ Get in Touch</div>
+        <h2 class="contact-ttl">Start Your Journey Today</h2>
+        <p class="contact-sub">Our travel experts are ready to plan your perfect trip.</p>
+      </div>
+      <form class="contact-form reveal" onsubmit="return false;">
+        <input type="text" placeholder="Your Name"/>
+        <input type="email" placeholder="Email Address"/>
+        <input type="text" placeholder="Where do you want to go?"/>
+        <textarea placeholder="Tell us about your dream trip…"></textarea>
+        <button class="c-submit" type="submit">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="fbrand"><div class="flogo">VOY<span>✦</span>ASTRA</div><p>Find the best travel deals across 190+ countries. Trusted by 4.8 million travellers worldwide.</p></div>
+        <div class="fcol"><h4>Explore</h4><ul><li><a>Flights</a></li><li><a>Hotels</a></li><li><a>Cruises</a></li><li><a>Train Routes</a></li></ul></div>
+        <div class="fcol"><h4>Company</h4><ul><li><a>About Us</a></li><li><a>Careers</a></li><li><a>Press</a></li><li><a>Partners</a></li></ul></div>
+        <div class="fcol"><h4>Account</h4><ul><li><a id="footerSignIn">Sign In / Register</a></li><li><a>Help Center</a></li><li><a>Privacy Policy</a></li><li><a>Terms</a></li></ul></div>
+      </div>
+      <div class="footer-bot">
+        <p>© 2025 <span>Voyastra</span> · Find the Best Travel Deals</p>
+        <p>✦ Compare flights, hotels &amp; destinations · Best prices guaranteed</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- BOOKING MODAL (mode-specific apps) -->
+  <div class="bk-overlay" id="bkOverlay">
+    <div class="bk-modal">
+      <button class="bk-close" id="bkClose">✕</button>
+      <div class="bk-title" id="bkTitle">Book Your Flight</div>
+      <div class="bk-sub" id="bkSub"></div>
+      <div class="bk-div"></div>
+      <div class="bk-sec" id="bkSec">Choose a booking app</div>
+      <div class="bk-grid" id="bkGrid"></div>
+    </div>
+  </div>
+
+  <!-- EXPLORE MODAL (destination cards) -->
+  <div class="modal-ov" id="explModal">
+    <div class="modal">
+      <button class="modal-x" id="mClose">✕</button>
+      <div class="modal-city" id="mCity"></div>
+      <div class="modal-reg" id="mReg"></div>
+      <div class="modal-div"></div>
+      <div id="mMain">
+        <div class="modal-sec">What would you like to do?</div>
+        <div class="modal-acts">
+          <button class="mact-btn" id="mPrices">
+            <div class="mact-ico price">💸</div>
+            <div class="mact-txt"><strong>Check Prices</strong><span>Compare live fares across travel apps</span></div>
+            <div class="mact-arr">→</div>
+          </button>
+        </div>
+      </div>
+      <div class="apps-pnl" id="mApps">
+        <button class="apps-back" id="mBack">← Back</button>
+        <div class="apps-note">Tap an app to search <strong id="mAppsCity"></strong> — destination loads automatically.</div>
+        <div class="apps-grid" id="mAppsGrid"></div>
+      </div>
+    </div>
+  </div>
+
+
+</div><!-- /appView -->
+
+<script>
+// ═══ CLOCK ═══
+function fmtClock(){
+  const n=new Date(),h=n.getHours(),m=n.getMinutes(),s=n.getSeconds();
+  const ap=h>=12?'PM':'AM',hh=h%12||12;
+  return String(hh).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+' '+ap;
+}
+function tickAll(){const t=fmtClock();document.getElementById('authClock').textContent=t;document.getElementById('appClock').textContent=t;}
+tickAll();setInterval(tickAll,1000);
+
+// ═══ VIEW SWITCHING ═══
+function showApp(){
+  document.getElementById('authView').classList.remove('active');
+  document.getElementById('authView').style.display='none';
+  document.getElementById('appView').classList.add('active');
+  document.getElementById('appView').style.display='block';
+  initApp();
+}
+function showAuth(){
+  document.getElementById('appView').classList.remove('active');
+  document.getElementById('appView').style.display='none';
+  document.getElementById('authView').classList.add('active');
+  document.getElementById('authView').style.display='flex';
+}
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
+
+// ═══ SESSION ═══
+function getUsers(){return JSON.parse(localStorage.getItem('voyastra_users')||'[]');}
+function saveUsers(u){localStorage.setItem('voyastra_users',JSON.stringify(u));}
+function getSess(){return JSON.parse(localStorage.getItem('voyastra_session')||'null');}
+function setSess(s){localStorage.setItem('voyastra_session',JSON.stringify(s));}
+function clearSess(){localStorage.removeItem('voyastra_session');}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  const s=getSess();
+  if(s){
+    showApp();
+    document.getElementById('userPill').style.display='flex';
+    document.getElementById('uName').textContent='👤 '+s.name;
+    document.getElementById('signinTopBtn').style.display='none';
+  } else {
+    document.getElementById('signinTopBtn').style.display='block';
+  }
+});
+
+// ═══ AUTH TABS ═══
+document.querySelectorAll('.atab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab==='login'?'loginForm':'regForm').classList.add('active');
+  });
+});
+
+// ═══ REGISTER ═══
+document.getElementById('regForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  let ok=true;
+  const name=document.getElementById('rName').value.trim();
+  const email=document.getElementById('rEmail').value.trim();
+  const pass=document.getElementById('rPass').value;
+  const pass2=document.getElementById('rPass2').value;
+  const se=(id,cond)=>{document.getElementById(id).style.display=cond?'block':'none';if(cond)ok=false;};
+  se('rNameErr',!name);se('rEmailErr',!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+  se('rPassErr',pass.length<6);se('rPass2Err',pass!==pass2||!pass2);
+  const ge=document.getElementById('rGenErr');
+  if(!ok){ge.style.display='none';return;}
+  const users=getUsers();
+  if(users.find(u=>u.email===email)){ge.textContent='Email already registered.';ge.classList.add('show');return;}
+  ge.classList.remove('show');
+  users.push({name,email,pass,created:new Date().toISOString()});saveUsers(users);setSess({name,email});
+  document.getElementById('regOk').classList.add('show');
+  setTimeout(()=>{showApp();document.getElementById('userPill').style.display='flex';document.getElementById('uName').textContent='👤 '+name;document.getElementById('signinTopBtn').style.display='none';},1200);
+});
+
+// ═══ LOGIN ═══
+document.getElementById('loginForm').addEventListener('submit',e=>{
+  e.preventDefault();let ok=true;
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value;
+  const se=(id,cond)=>{document.getElementById(id).style.display=cond?'block':'none';if(cond)ok=false;};
+  se('lEmailErr',!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));se('lPassErr',!pass);
+  if(!ok)return;
+  const ge=document.getElementById('lGenErr');
+  const user=getUsers().find(u=>u.email===email&&u.pass===pass);
+  if(!user){ge.textContent='Invalid email or password.';ge.classList.add('show');return;}
+  ge.classList.remove('show');setSess({name:user.name,email:user.email});
+  document.getElementById('loginOk').classList.add('show');
+  setTimeout(()=>{showApp();document.getElementById('userPill').style.display='flex';document.getElementById('uName').textContent='👤 '+user.name;document.getElementById('signinTopBtn').style.display='none';},1000);
+});
+
+// ═══ LOGOUT ═══
+document.getElementById('logoutBtn').addEventListener('click',()=>{
+  clearSess();document.getElementById('userPill').style.display='none';document.getElementById('signinTopBtn').style.display='block';showAuth();
+  document.getElementById('loginForm').reset();document.getElementById('regForm').reset();
+  document.getElementById('loginOk').classList.remove('show');document.getElementById('lGenErr').classList.remove('show');
+});
+document.getElementById('navCta').addEventListener('click',()=>{const s=getSess();if(!s)showAuth();else document.getElementById('contact').scrollIntoView({behavior:'smooth'});});
+document.getElementById('footerSignIn').addEventListener('click',()=>{const s=getSess();if(!s)showAuth();});
+document.getElementById('signinTopBtn').addEventListener('click',showAuth);
+
+// ═══════════════════════════════════════════════
+// APP INIT
+// ═══════════════════════════════════════════════
+let appInited=false;
+function initApp(){
+  if(appInited)return;appInited=true;
+
+  // ── WORLD CITIES ──
+  const CITIES=[
+    "Abu Dhabi, UAE","Accra, Ghana","Addis Ababa, Ethiopia","Ahmedabad, India","Amsterdam, Netherlands",
+    "Ankara, Turkey","Athens, Greece","Atlanta, USA","Auckland, New Zealand","Baghdad, Iraq",
+    "Bangalore, India","Bangkok, Thailand","Barcelona, Spain","Beijing, China","Beirut, Lebanon",
+    "Belgrade, Serbia","Berlin, Germany","Bogotá, Colombia","Brussels, Belgium","Budapest, Hungary",
+    "Buenos Aires, Argentina","Cairo, Egypt","Cape Town, South Africa","Casablanca, Morocco",
+    "Chennai, India","Chicago, USA","Colombo, Sri Lanka","Copenhagen, Denmark","Dallas, USA",
+    "Dar es Salaam, Tanzania","Delhi, India","Dhaka, Bangladesh","Dubai, UAE","Dublin, Ireland",
+    "Frankfurt, Germany","Geneva, Switzerland","Guangzhou, China","Hanoi, Vietnam","Havana, Cuba",
+    "Helsinki, Finland","Ho Chi Minh City, Vietnam","Hong Kong","Hyderabad, India",
+    "Istanbul, Turkey","Jakarta, Indonesia","Jeddah, Saudi Arabia","Johannesburg, South Africa",
+    "Karachi, Pakistan","Kathmandu, Nepal","Kolkata, India","Kuala Lumpur, Malaysia","Kuwait City, Kuwait",
+    "Lagos, Nigeria","Lahore, Pakistan","Lima, Peru","Lisbon, Portugal","London, UK",
+    "Los Angeles, USA","Luanda, Angola","Madrid, Spain","Manila, Philippines","Melbourne, Australia",
+    "Mexico City, Mexico","Miami, USA","Milan, Italy","Montreal, Canada","Moscow, Russia",
+    "Mumbai, India","Muscat, Oman","Nairobi, Kenya","New York, USA","Oslo, Norway",
+    "Ottawa, Canada","Paris, France","Prague, Czech Republic","Pune, India","Riyadh, Saudi Arabia",
+    "Rome, Italy","San Francisco, USA","Santiago, Chile","São Paulo, Brazil","Seoul, South Korea",
+    "Shanghai, China","Singapore","Stockholm, Sweden","Sydney, Australia","Taipei, Taiwan",
+    "Tehran, Iran","Tel Aviv, Israel","Tokyo, Japan","Toronto, Canada","Vancouver, Canada",
+    "Vienna, Austria","Warsaw, Poland","Washington DC, USA","Zurich, Switzerland"
+  ];
+
+  // ── TOURIST SPOTS ──
+  const SPOTS=[
+    "Agra Fort, India","Ajanta Caves, India","Amber Fort, Jaipur, India","Andaman Islands, India",
+    "Angkor Wat, Cambodia","Amalfi Coast, Italy","Backwaters of Kerala, India",
+    "Bali Rice Terraces, Indonesia","Bangkok Grand Palace, Thailand","Banff National Park, Canada",
+    "Borobudur Temple, Indonesia","Cappadocia Hot Air Balloons, Turkey","Cape of Good Hope, South Africa",
+    "Charminar, Hyderabad, India","Char Dham, India","Cherry Blossom, Tokyo, Japan",
+    "Chichen Itza, Mexico","Colosseum, Rome, Italy","Coorg, Karnataka, India",
+    "Darjeeling Tea Gardens, India","Dead Sea, Jordan","Eiffel Tower, Paris, France",
+    "Ellora Caves, India","Forbidden City, Beijing, China","Galápagos Islands, Ecuador",
+    "Goa Beaches, India","Golden Temple, Amritsar, India","Great Barrier Reef, Australia",
+    "Great Wall of China","Ha Long Bay, Vietnam","Hagia Sophia, Istanbul, Turkey",
+    "Hampi Ruins, India","Himalayan Trek, India","Houseboat, Alleppey, India",
+    "Iguazu Falls, Argentina","Istanbul Old City, Turkey","Jaipur Pink City, India",
+    "Jaisalmer Desert, India","Jeju Island, South Korea","Kathmandu Valley, Nepal",
+    "Kaziranga National Park, India","Khajuraho Temples, India","Kodaikanal, India",
+    "Komodo Island, Indonesia","Konark Sun Temple, India","Kyoto Temples, Japan",
+    "Ladakh, India","Leh Monastery, India","Louvre Museum, Paris, France",
+    "Luang Prabang, Laos","Machu Picchu, Peru","Mahabalipuram, India",
+    "Maldives Overwater Bungalows","Masai Mara Safari, Kenya","Matterhorn, Switzerland",
+    "Medina of Marrakech, Morocco","Meenakshi Temple, Madurai, India","Mont Saint-Michel, France",
+    "Mount Fuji, Japan","Munnar Hills, India","Mysore Palace, India","Nainital, India",
+    "Niagara Falls, Canada","Nile River Cruise, Egypt","Northern Lights, Iceland",
+    "Ooty, India","Patagonia, Argentina","Petra, Jordan","Phi Phi Islands, Thailand",
+    "Phuket Beaches, Thailand","Pompeii, Italy","Pondicherry, India","Pushkar Lake, India",
+    "Pyramids of Giza, Egypt","Qutub Minar, Delhi, India","Rann of Kutch, India",
+    "Reykjavik, Iceland","Rialto Bridge, Venice, Italy","Rishikesh Rafting, India",
+    "Sagrada Familia, Barcelona, Spain","Sahara Desert, Morocco","Santorini Caldera, Greece",
+    "Serengeti National Park, Tanzania","Shimla, India","Sigiriya Rock, Sri Lanka",
+    "Singapore Gardens by the Bay","Spiti Valley, India","Stonehenge, UK",
+    "Sunderbans, India","Table Mountain, South Africa","Taj Mahal, Agra, India",
+    "Teotihuacan Pyramids, Mexico","Torres del Paine, Chile","Uluru, Australia",
+    "Valley of Flowers, India","Varanasi Ghats, India","Vatican City, Italy",
+    "Venice Canals, Italy","Victoria Falls, Zimbabwe","Waitomo Glowworm Caves, New Zealand",
+    "Wayanad, India","Yellowstone, USA","Yosemite Valley, USA",
+    "Zanzibar Beach, Tanzania","Zhangjiajie, China","Zion National Park, USA"
+  ];
+
+  function setupAC(inId,dropId,data){
+    const inp=document.getElementById(inId);
+    const drp=document.getElementById(dropId);
+    let hi=-1;
+    inp.addEventListener('input',()=>{
+      const v=inp.value.trim().toLowerCase();
+      if(v.length<1){drp.classList.remove('open');return;}
+      const m=data.filter(d=>d.toLowerCase().includes(v)).slice(0,10);
+      if(!m.length){drp.classList.remove('open');return;}
+      drp.innerHTML=m.map(x=>`<div class="ac-item" data-v="${x}">${x}</div>`).join('');
+      drp.classList.add('open');hi=-1;
+      drp.querySelectorAll('.ac-item').forEach(it=>{
+        it.addEventListener('mousedown',()=>{inp.value=it.dataset.v;drp.classList.remove('open');});
+      });
+    });
+    inp.addEventListener('keydown',e=>{
+      const its=drp.querySelectorAll('.ac-item');if(!its.length)return;
+      if(e.key==='ArrowDown')hi=Math.min(hi+1,its.length-1);
+      else if(e.key==='ArrowUp')hi=Math.max(hi-1,0);
+      else if(e.key==='Enter'&&hi>=0){inp.value=its[hi].dataset.v;drp.classList.remove('open');e.preventDefault();}
+      else if(e.key==='Escape')drp.classList.remove('open');
+      its.forEach((it,i)=>it.classList.toggle('hi',i===hi));
+    });
+    document.addEventListener('click',e=>{
+      if(!inp.contains(e.target)&&!drp.contains(e.target))drp.classList.remove('open');
+    });
+  }
+  setupAC('fromInput','fromDrop',CITIES);
+  setupAC('toInput','toDrop',SPOTS);
+
+  // ── TRAVEL MODE ──
+  let selectedMode='flight';
+  document.querySelectorAll('.mode-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedMode=btn.dataset.mode;
+    });
+  });
+
+  // ── BOOKING APPS by mode ──
+  function getBookingApps(fr,to,mode){
+    const d=new Date();
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const dd2=String(d.getDate()).padStart(2,'0');
+    const yyyy=d.getFullYear();
+    const dMMDDYYYY=mm+'/'+dd2+'/'+yyyy;
+    const dYYYYMMDD=yyyy+mm+dd2;
+    const frE=encodeURIComponent(fr);const toE=encodeURIComponent(to);
+
+    const flightApps=[
+      {name:"MakeMyTrip",type:"Flights · Hotels",icon:"✈",col:"#E8002D",url:`https://www.makemytrip.com/flights/?itinerary=${frE}-${toE}&tripType=O&paxType=A-1_C-0_I-0&cabinClass=E`},
+      {name:"Yatra",type:"Flights · Hotels · Holidays",icon:"🌍",col:"#0078D7",url:`https://flight.yatra.com/air-search-ui/#/results?from=${frE}&to=${toE}&dep=${dYYYYMMDD}&pax=1-0-0&cls=E&type=O`},
+      {name:"Goibibo",type:"Flights · Hotels",icon:"🚀",col:"#00A3E0",url:`https://www.goibibo.com/flights/`},
+      {name:"Cleartrip",type:"Flights · Hotels",icon:"🎯",col:"#F26522",url:`https://www.cleartrip.com/flights/`},
+      {name:"EaseMyTrip",type:"Flights · Holidays",icon:"🛫",col:"#00A651",url:`https://www.easemytrip.com/flights/`},
+      {name:"Skyscanner",type:"Best flight deals",icon:"🔍",col:"#0770E3",url:`https://www.skyscanner.co.in/`},
+      {name:"Google Flights",type:"Compare all airlines",icon:"G",col:"#4285F4",url:`https://www.google.com/flights?q=flights+from+${frE}+to+${toE}`},
+      {name:"Kayak",type:"Flight comparison",icon:"🛩",col:"#FF690F",url:`https://www.kayak.co.in/flights/${frE}-${toE}/${dYYYYMMDD}/1adults`}
+    ];
+    const trainApps=[
+      {name:"IRCTC",type:"Indian Railways",icon:"🚂",col:"#0078B4",url:`https://www.irctc.co.in/nget/train-search`},
+      {name:"Ixigo Trains",type:"Train tickets & PNR",icon:"🚆",col:"#E84B3A",url:`https://www.ixigo.com/trains/search/train/${frE}/${toE}/${dYYYYMMDD}/1/GENERAL/1/0`},
+      {name:"RailYatri",type:"Train booking",icon:"🛤",col:"#FF6B00",url:`https://www.railyatri.in/train-between-stations?from=${frE}&to=${toE}&date=${dYYYYMMDD}`},
+      {name:"Paytm Trains",type:"Train tickets",icon:"P",col:"#002970",url:`https://tickets.paytm.com/train/search?from=${frE}&to=${toE}&date=${dYYYYMMDD}`},
+      {name:"Trainman",type:"Train booking",icon:"🚉",col:"#1565C0",url:`https://www.trainman.in/trains/${frE}/${toE}/${dYYYYMMDD}`},
+      {name:"Omio",type:"Train across Europe",icon:"🌍",col:"#6236FF",url:`https://www.omio.com/`},
+      {name:"Eurail",type:"Europe rail passes",icon:"🚄",col:"#003F87",url:`https://www.eurail.com/`},
+      {name:"12Go Asia",type:"Trains in Asia",icon:"🌏",col:"#E91E63",url:`https://12go.asia/en/train`}
+    ];
+    const shipApps=[
+      {name:"Booking.com",type:"Ferries & cruises",icon:"🏨",col:"#003580",url:`https://www.booking.com/searchresults.html?ss=${toE}`},
+      {name:"Cruise Critic",type:"Cruise reviews",icon:"🚢",col:"#0077B6",url:`https://www.cruisecritic.co.in/`},
+      {name:"Royal Caribbean",type:"Cruise booking",icon:"⚓",col:"#004C97",url:`https://www.royalcaribbean.com/`},
+      {name:"MSC Cruises",type:"Cruise booking",icon:"🛳",col:"#002B6B",url:`https://www.msccruises.co.in/`},
+      {name:"Ferryhopper",type:"Ferry tickets",icon:"⛴",col:"#0099D8",url:`https://www.ferryhopper.com/`},
+      {name:"12Go Asia",type:"Ferries in Asia",icon:"🌏",col:"#E91E63",url:`https://12go.asia/en/ferry`},
+      {name:"Direct Ferries",type:"Ferry routes worldwide",icon:"🚤",col:"#1565C0",url:`https://www.directferries.co.in/`},
+      {name:"Viator",type:"Boat tours",icon:"🤿",col:"#48B0A8",url:`https://www.viator.com/`}
+    ];
+    const busApps=[
+      {name:"redBus",type:"Bus tickets India",icon:"🚌",col:"#D84315",url:`https://www.redbus.in/bus-tickets/${frE.replace(/%20/g,'-').toLowerCase()}-to-${toE.replace(/%20/g,'-').toLowerCase()}`},
+      {name:"Abhibus",type:"Bus booking India",icon:"🚍",col:"#FF6B35",url:`https://www.abhibus.com/`},
+      {name:"MakeMyTrip Bus",type:"Bus tickets",icon:"✈",col:"#E8002D",url:`https://www.makemytrip.com/bus-tickets/`},
+      {name:"Ixigo Bus",type:"Bus + train",icon:"🚆",col:"#E84B3A",url:`https://www.ixigo.com/bus/search/${frE}/${toE}/${dYYYYMMDD}/1`},
+      {name:"Yatra Bus",type:"Bus booking",icon:"🌍",col:"#0078D7",url:`https://www.yatra.com/bus-tickets/`},
+      {name:"FlixBus",type:"Intercity buses",icon:"🟢",col:"#73D700",url:`https://www.flixbus.in/`},
+      {name:"Goibibo Bus",type:"Bus tickets",icon:"🚀",col:"#00A3E0",url:`https://www.goibibo.com/bus/`},
+      {name:"Paytm Bus",type:"Bus booking",icon:"P",col:"#002970",url:`https://tickets.paytm.com/bus/`}
+    ];
+    return mode==='train'?trainApps:mode==='ship'?shipApps:mode==='bus'?busApps:flightApps;
+  }
+
+  // ── BOOKING MODAL ──
+  function openBookingModal(fr,to,mode){
+    const titles={flight:'Book Your Flight',train:'Book Your Train',ship:'Book a Ship / Ferry / Cruise',bus:'Book Your Bus'};
+    const icons={flight:'✈',train:'🚂',ship:'🚢',bus:'🚌'};
+    document.getElementById('bkTitle').textContent=icons[mode]+' '+titles[mode];
+    document.getElementById('bkSub').textContent=fr+' → '+to;
+    const apps=getBookingApps(fr,to,mode);
+    document.getElementById('bkGrid').innerHTML=apps.map(a=>`
+      <a class="bk-app" href="${a.url}" target="_blank" rel="noopener">
+        <div class="bk-ico" style="color:${a.col};">${a.icon}</div>
+        <div><div class="bk-app-name">${a.name}</div><div class="bk-app-type">${a.type}</div></div>
+      </a>
+    `).join('');
+    document.getElementById('bkOverlay').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeBookingModal(){document.getElementById('bkOverlay').classList.remove('open');document.body.style.overflow='';}
+  document.getElementById('bkClose').addEventListener('click',closeBookingModal);
+  document.getElementById('bkOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('bkOverlay'))closeBookingModal();});
+
+  // ── VIEW ROUTE ON MAP — opens Google Maps directly ──
+  document.getElementById('mapRouteBtn').addEventListener('click',()=>{
+    const fr=document.getElementById('fromInput').value.trim();
+    const to=document.getElementById('toInput').value.trim();
+    if(!fr||!to){alert('Please enter both a departure city and a destination to view the route.');return;}
+    const frE=encodeURIComponent(fr);
+    const toE=encodeURIComponent(to);
+    window.open(`https://www.google.com/maps/dir/${frE}/${toE}/`,'_blank');
+  });
+
+  // ── SEARCH / BOOK BUTTON ──
+  document.getElementById('searchBtn').addEventListener('click',()=>{
+    const fr=document.getElementById('fromInput').value.trim();
+    const to=document.getElementById('toInput').value.trim();
+    if(!fr||!to){alert('Please enter both a departure city and a destination.');return;}
+    openBookingModal(fr,to,selectedMode);
+  });
+
+  // ── DESTINATIONS DATA ──
+  const DESTS=[
+    {city:"Mumbai",region:"India · Asia",meta:"Tropical · 28°C · Nov–Mar",tags:["flight","train"],rating:"4.5",img:"https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=600&q=70",hidden:false,iata:"BOM"},
+    {city:"New Delhi",region:"India · Asia",meta:"Semi-arid · 25°C · Oct–Mar",tags:["flight","train"],rating:"4.4",img:"https://images.unsplash.com/photo-1587474260584-136574528ed5?w=600&q=70",hidden:false,iata:"DEL"},
+    {city:"Paris",region:"France · Europe",meta:"Oceanic · 15°C · Apr–Jun",tags:["flight","train"],rating:"4.8",img:"https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&q=70",hidden:false,iata:"CDG"},
+    {city:"Rome",region:"Italy · Europe",meta:"Mediterranean · 18°C · Apr–Jun",tags:["flight","train","bus"],rating:"4.8",img:"https://images.unsplash.com/photo-1525874684015-58379d421a52?w=600&q=70",hidden:false,iata:"FCO"},
+    {city:"Bali",region:"Indonesia · Asia",meta:"Tropical · 29°C · Apr–Oct",tags:["flight","cruise"],rating:"4.8",img:"https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&q=70",hidden:false,iata:"DPS"},
+    {city:"Tokyo",region:"Japan · Asia",meta:"Humid subtropical · 16°C · Mar–May",tags:["flight","train"],rating:"4.9",img:"https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&q=70",hidden:false,iata:"NRT"},
+    {city:"Maldives",region:"Maldives · Asia",meta:"Tropical island · 30°C · Nov–Apr",tags:["flight","cruise"],rating:"4.9",img:"https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=600&q=70",hidden:true,iata:"MLE"},
+    {city:"Cape Town",region:"South Africa · Africa",meta:"Mediterranean · 18°C · Nov–Mar",tags:["flight","cruise"],rating:"4.8",img:"https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=600&q=70",hidden:false,iata:"CPT"},
+    {city:"Banff",region:"Canada · Americas",meta:"Alpine · 5°C · Jun–Sep",tags:["flight","bus"],rating:"4.9",img:"https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=70",hidden:true,iata:"YYC"},
+    {city:"Santorini",region:"Greece · Europe",meta:"Mediterranean · 22°C · May–Oct",tags:["flight","cruise"],rating:"4.9",img:"https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=600&q=70",hidden:false,iata:"JTR"},
+    {city:"Machu Picchu",region:"Peru · Americas",meta:"Highland subtropical · 18°C · May–Sep",tags:["flight","train","bus"],rating:"4.9",img:"https://images.unsplash.com/photo-1587595431973-160d0d94add1?w=600&q=70",hidden:true,iata:"CUZ"},
+    {city:"Reykjavik",region:"Iceland · Europe",meta:"Subarctic · 5°C · Jun–Aug",tags:["flight","bus"],rating:"4.8",img:"https://images.unsplash.com/photo-1504829857797-ddff29c27927?w=600&q=70",hidden:true,iata:"KEF"}
+  ];
+
+  function buildApps(city,iata){
+    const d=new Date();
+    const mm=String(d.getMonth()+1).padStart(2,'0');
+    const dd2=String(d.getDate()).padStart(2,'0');
+    const yyyy=d.getFullYear();
+    const dMMDDYYYY=mm+'/'+dd2+'/'+yyyy;
+    const dYYYYMMDD=yyyy+mm+dd2;
+    const c=encodeURIComponent(city);const ia=iata.toLowerCase();
+    return[
+      {name:"MakeMyTrip",type:"Flights · Hotels · Buses",icon:"✈",col:"#E8002D",url:`https://www.makemytrip.com/flights/international/hyderabad-${ia}/one-way/${dMMDDYYYY}/1/0/0/E/NA`},
+      {name:"Yatra",type:"Flights · Hotels · Holidays",icon:"🌍",col:"#0078D7",url:`https://flight.yatra.com/air-search-ui/#/results?from=HYD&to=${iata}&dep=${dYYYYMMDD}&pax=1-0-0&cls=E&type=O`},
+      {name:"Goibibo",type:"Flights · Hotels · Trains",icon:"🚀",col:"#00A3E0",url:`https://www.goibibo.com/flights/search/hyd-${ia}-${dYYYYMMDD}-1-0-0-E-NA/`},
+      {name:"Cleartrip",type:"Flights · Hotels · Activities",icon:"🎯",col:"#F26522",url:`https://www.cleartrip.com/flights/results?from=HYD&to=${iata}&depart_date=${dYYYYMMDD}&adults=1&childs=0&infants=0&class=Economy`},
+      {name:"EaseMyTrip",type:"Flights · Holidays · Buses",icon:"🛫",col:"#00A651",url:`https://www.easemytrip.com/flights/search?ori=HYD&des=${iata}&dd=${dYYYYMMDD}&tt=1&ad=1&ch=0&inf=0&cl=E`},
+      {name:"Ixigo",type:"Trains · Flights · Buses",icon:"🚆",col:"#E84B3A",url:`https://www.ixigo.com/search/result/flight?from=HYD&to=${iata}&date=${dYYYYMMDD}&adults=1&children=0&infants=0&class=e`},
+      {name:"Booking.com",type:"Hotels · Flights · Cars",icon:"🏨",col:"#003580",url:`https://www.booking.com/searchresults.html?ss=${c}`},
+      {name:"Skyscanner",type:"Flights · Hotels · Cars",icon:"🔍",col:"#0770E3",url:`https://www.skyscanner.co.in/transport/flights/hyd/${ia}/${dYYYYMMDD}/`}
+    ];
+  }
+
+  let activeFilter='all',searchQuery='',curCity='',curIata='';
+
+  function renderCards(){
+    const grid=document.getElementById('cardGrid');
+    const fl=DESTS.filter(d=>{
+      const mf=activeFilter==='all'||(activeFilter==='hidden'?d.hidden:d.tags.includes(activeFilter));
+      const ms=d.city.toLowerCase().includes(searchQuery)||d.region.toLowerCase().includes(searchQuery);
+      return mf&&ms;
+    });
+    if(!fl.length){grid.innerHTML='<p style="text-align:center;color:var(--muted);padding:40px;grid-column:1/-1;">No destinations found.</p>';return;}
+    grid.innerHTML=fl.map(d=>`
+      <div class="dest-card">
+        <div class="card-img">
+          <img src="${d.img}" alt="${d.city}" loading="lazy"/>
+          ${d.hidden?'<div class="card-badge">Hidden Gem</div>':''}
+          <div class="card-rating">★ ${d.rating}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-city">${d.city}</div>
+          <div class="card-region">${d.region}</div>
+          <div class="card-meta">${d.meta}</div>
+          <div class="card-tags">${d.tags.map(t=>`<span class="ctag">${t}</span>`).join('')}</div>
+          <div class="card-foot">
+            <button class="exp-btn" onclick="openModal('${d.city}','${d.region}','${d.iata}')">✦ Explore</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  window.openModal=function(city,region,iata){
+    curCity=city;curIata=iata;
+    document.getElementById('mCity').textContent=city;
+    document.getElementById('mReg').textContent=region;
+    document.getElementById('mMain').style.display='block';
+    document.getElementById('mApps').classList.remove('open');
+    document.getElementById('explModal').classList.add('open');
+    document.body.style.overflow='hidden';
+  };
+  function closeModal(){document.getElementById('explModal').classList.remove('open');document.body.style.overflow='';}
+  document.getElementById('mClose').addEventListener('click',closeModal);
+  document.getElementById('explModal').addEventListener('click',e=>{if(e.target===document.getElementById('explModal'))closeModal();});
+  document.getElementById('mPrices').addEventListener('click',()=>{
+    document.getElementById('mMain').style.display='none';
+    document.getElementById('mAppsCity').textContent=curCity;
+    document.getElementById('mApps').classList.add('open');
+    document.getElementById('mAppsGrid').innerHTML=buildApps(curCity,curIata).map(a=>`
+      <a class="app-link" href="${a.url}" target="_blank" rel="noopener">
+        <div class="app-ico" style="color:${a.col};">${a.icon}</div>
+        <div><div class="app-nm">${a.name}</div><div class="app-tp">${a.type}</div></div>
+      </a>
+    `).join('');
+  });
+  document.getElementById('mBack').addEventListener('click',()=>{document.getElementById('mApps').classList.remove('open');document.getElementById('mMain').style.display='block';});
+
+  document.querySelectorAll('.fbtn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');activeFilter=b.dataset.filter;renderCards();
+    });
+  });
+  document.getElementById('searchInput').addEventListener('input',e=>{searchQuery=e.target.value.toLowerCase();renderCards();});
+  renderCards();
+
+  const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');});},{threshold:0.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+}
+</script>
+</body>
+</html>
